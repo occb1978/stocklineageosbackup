@@ -1,4 +1,4 @@
-name: lineage microg random
+name: lineage random
 
 on:
   workflow_dispatch:
