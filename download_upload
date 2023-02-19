@@ -26,7 +26,7 @@ do
   echo $i
   wget --quiet $i 
 done
-exit 0
+
 github-release  info --user occb1978 \
    --repo stocklineageosbackup \
    | grep artifact  > current_files_in_github
