@@ -23,6 +23,7 @@ cat ~/raw.html | grep mirrorbits| sed 's/href=/\nhref=/g' | grep href=\" | sed '
 
 for i in `cat list_of_links`
 do
+  echo $i
   wget --quiet $i 
 done
 exit 0
