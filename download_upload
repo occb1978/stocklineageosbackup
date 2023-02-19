@@ -1,0 +1,57 @@
+#!/bin/bash
+
+export GITHUB_TOKEN=github_pat_CHANGEME
+
+myArray=("raven" "bluejay" "panther" "cheetah" "oriole" "taimen" "blueline" "crosshatch" "sargo" "bonito" "flame" "coral" "sunfish" "bramble" "redfin" "barbet" "marlin")
+#myArray=("taimen" "blueline" "crosshatch" "sargo" "bonito" "flame" "coral" "sunfish" "bramble" "redfin" "barbet" "marlin")
+#myArray=("crosshatch" "sargo" "bonito" "flame" "coral" "sunfish" "bramble" "redfin" "barbet" "marlin")
+RANDOM_DEVICE=${myArray[ $RANDOM % ${#myArray[@]} ]}
+echo $RANDOM_DEVICE
+
+#for LIST_OF_DEVICES in ${myArray[@]}
+#do
+#echo $LIST_OF_DEVICES
+#github-release release  --user occb1978 --repo stocklineageosbackup --tag $LIST_OF_DEVICES
+#sleep 2
+#done
+#exit 0
+#echo "Downloading lineage files"
+curl -sSL https://download.lineageos.org/$RANDOM_DEVICE -o ~/raw.html
+#done
+cat ~/raw.html | grep mirrorbits| sed 's/href=/\nhref=/g' | grep href=\" | sed 's/.*href="//g;s/".*//g' | head -4 > list_of_links
+
+
+for i in `cat list_of_links`
+do
+  wget --quiet $i 
+done
+exit 0
+github-release  info --user occb1978 \
+   --repo stocklineageosbackup \
+   | grep artifact  > current_files_in_github
+
+echo "Renaming lineage files"
+for i in `find . -type f \( -iname lineage\*m -o -iname lineage\*.zip -o -iname lineage\*img -o -iname lineage\*256 \) -printf '%f\n'`
+do
+rename -f 's/\?/./g' "${i}"
+done
+
+echo "Listing lineage files"
+for i in `find . -type f \( -iname lineage\*m -o -iname lineage\*.zip -o -iname lineage\*img \) -printf '%f\n'`
+do
+echo $i
+  if grep $i current_files_in_github > /dev/null
+  then
+    echo $i " exists in github"
+    rm -f $i
+  else
+      echo $i " is a new file. So uploading..."
+      github-release upload --user occb1978 \
+         --repo stocklineageosbackup \
+         --tag $RANDOM_DEVICE  \
+         --file $i --name $i
+      rm -fr $i
+      sleep 2
+   fi
+done
+
